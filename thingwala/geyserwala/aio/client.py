@@ -44,9 +44,9 @@ class GeyserwalaClientAsync:
             "setpoint",
             "element-demand",
             "mode",
-            "remote-demand",
-            "remote-disable",
-            "remote-setpoint",
+            "external-demand",
+            "external-setpoint",
+            "lowpower-enable",
         ]
 
     async def close(self):
@@ -222,27 +222,27 @@ class GeyserwalaClientAsync:
         return False
 
     @property
-    def remote_demand(self):
-        return self._status.get("remote-demand", None)
+    def external_demand(self):
+        return self._status.get("external-demand", None)
 
-    async def set_remote_demand(self, on: bool):
-        return await self._set_value("remote-demand", on)
+    async def set_external_demand(self, on: bool):
+        return await self._set_value("external-demand", on)
 
     @property
-    def remote_setpoint(self):
+    def external_setpoint(self):
         return self._status.get("setpoint", None)
 
-    async def set_remote_setpoint(self, remote_setpoint: int):
-        if GEYSERWALA_SETPOINT_TEMP_MIN <= remote_setpoint <= GEYSERWALA_SETPOINT_TEMP_MAX:
-            return await self._set_value("remote-setpoint", remote_setpoint)
+    async def set_external_setpoint(self, external_setpoint: int):
+        if GEYSERWALA_SETPOINT_TEMP_MIN <= external_setpoint <= GEYSERWALA_SETPOINT_TEMP_MAX:
+            return await self._set_value("external-setpoint", external_setpoint)
         return False
 
     @property
-    def remote_disable(self):
-        return self._status.get("remote-disable", None)
+    def lowpower_enable(self):
+        return self._status.get("lowpower-enable", None)
 
-    async def set_remote_disable(self, on: bool):
-        return await self._set_value("remote-disable", on)
+    async def set_lowpower_enable(self, on: bool):
+        return await self._set_value("lowpower-enable", on)
 
     async def add_timer(self, timer: dict):
         timer['id'] = 0
