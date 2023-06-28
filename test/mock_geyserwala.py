@@ -64,7 +64,7 @@ class Server:
         )
 
     async def handle_post_session(self, request):
-        return web.json_response(data={"success": True, "jwt": self.value['id']})
+        return web.json_response(data={"success": True, "token": self.value['id']})
 
     def _authed(self, request):
         try:

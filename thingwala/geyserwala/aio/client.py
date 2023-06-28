@@ -11,6 +11,11 @@ import aiohttp
 from thingwala.geyserwala.errors import Unauthorized, RequestError
 from thingwala.geyserwala.const import (
     GEYSERWALA_MODES,
+    GEYSERWALA_MODE_SETPOINT,
+    GEYSERWALA_MODE_TIMER,
+    GEYSERWALA_MODE_SOLAR,
+    GEYSERWALA_MODE_HOLIDAY,
+    GEYSERWALA_MODE_STANDBY,
     GEYSERWALA_SETPOINT_TEMP_MAX,
     GEYSERWALA_SETPOINT_TEMP_MIN,
 )
@@ -31,6 +36,7 @@ class GeyserwalaClientAsync:
         self._session = session or aiohttp.ClientSession()
         self._status = {}
         self._status_values = [
+            "features",
             "id",
             "version",
             "name",
@@ -54,7 +60,7 @@ class GeyserwalaClientAsync:
 
     @property
     def authorized(self):
-        return getattr(self._session, '_jwt', None) is not None
+        return getattr(self._session, '_token', None) is not None
 
     async def _value_callback(self, value):
         if asyncio.iscoroutinefunction(value):
@@ -69,10 +75,10 @@ class GeyserwalaClientAsync:
         password = await self._value_callback(self._pass)
         rsp = await self._json_req('POST', 'api/session', json={'username': self._user, 'password': password})
         if not rsp:
-            self._session._jwt = None
+            self._session._token = None
             return False
         if rsp['success'] is True:
-            self._session._jwt = rsp['jwt']
+            self._session._token = rsp['token']
             return True
         return False
 
@@ -81,7 +87,7 @@ class GeyserwalaClientAsync:
         if not rsp:
             return False
         if rsp['success'] is True:
-            self._session._jwt = None
+            self._session._token = None
             return True
         return False
 
@@ -101,8 +107,8 @@ class GeyserwalaClientAsync:
                     "Content-Type": "application/json",
                     "Accept": "application/json"
                 }
-                if hasattr(self._session, '_jwt'):
-                    headers["Authorization"] = f"Bearer {self._session._jwt}"
+                if hasattr(self._session, '_token'):
+                    headers["Authorization"] = f"Bearer {self._session._token}"
 
                 url = f"{self._scheme}://{self._host}:{self._port}/{path}"
                 async with self._session.request(
@@ -135,8 +141,8 @@ class GeyserwalaClientAsync:
             )
             raise RequestError from ex
         if status == 401:
-            if hasattr(self._session, '_jwt'):
-                delattr(self._session, '_jwt')
+            if hasattr(self._session, '_token'):
+                delattr(self._session, '_token')
             raise Unauthorized()
         raise RequestError("Unexpected status: %s", status)
 
@@ -163,6 +169,12 @@ class GeyserwalaClientAsync:
     @property
     def version(self):
         return self._status.get("version", "?")
+
+    def has_feature(self, key):
+        try:
+            return self._status.get("features", {})[key]
+        except KeyError:
+            return False
 
     @property
     def name(self):
@@ -211,6 +223,19 @@ class GeyserwalaClientAsync:
     @property
     def element_demand(self):
         return self._status.get("element-demand", None)
+
+    @property
+    def modes(self):
+        modes = []
+        modes.append(GEYSERWALA_MODE_SETPOINT)
+        modes.append(GEYSERWALA_MODE_TIMER)
+        if self.has_feature('f-collector'):
+            modes.append(GEYSERWALA_MODE_SOLAR)
+        if self.has_feature('f-collector'):
+            modes.append(GEYSERWALA_MODE_HOLIDAY)
+        if not self.has_feature('f-collector'):
+            modes.append(GEYSERWALA_MODE_STANDBY)
+        return modes
 
     @property
     def mode(self):

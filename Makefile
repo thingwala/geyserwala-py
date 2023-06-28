@@ -1,5 +1,7 @@
 PYPI_USER=ThingWala
 
+.PHONY: test
+
 check:
 	flake8 ./thingwala/geyserwala --ignore E501
 	find ./thingwala/geyserwala -name '*.py' \
