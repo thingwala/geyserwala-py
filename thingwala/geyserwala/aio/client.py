@@ -1,5 +1,5 @@
 ####################################################################################
-# Copyright (c) 2023 ThingWala                                                     #
+# Copyright (c) 2023 Thingwala                                                     #
 ####################################################################################
 import logging
 import asyncio
@@ -255,7 +255,7 @@ class GeyserwalaClientAsync:
 
     @property
     def external_setpoint(self):
-        return self._status.get("setpoint", None)
+        return self._status.get("external-setpoint", None)
 
     async def set_external_setpoint(self, external_setpoint: int):
         if GEYSERWALA_SETPOINT_TEMP_MIN <= external_setpoint <= GEYSERWALA_SETPOINT_TEMP_MAX:

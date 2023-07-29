@@ -3,7 +3,7 @@ from setuptools import setup, find_namespace_packages
 setup(
     name='thingwala-geyserwala',
     description="Python bindings to the Geyserwala REST API",
-    author="ThingWala",
+    author="Thingwala",
     url="https://github.com/thingwala/geyserwala-py",
     license="MIT",
     packages=find_namespace_packages(include=['thingwala.*']),

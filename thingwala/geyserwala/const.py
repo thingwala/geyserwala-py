@@ -1,5 +1,5 @@
 ####################################################################################
-# Copyright (c) 2023 ThingWala                                                     #
+# Copyright (c) 2023 Thingwala                                                     #
 ####################################################################################
 GEYSERWALA_MODE_SETPOINT = "SETPOINT"
 GEYSERWALA_MODE_TIMER = "TIMER"

@@ -1,4 +1,4 @@
-PYPI_USER=ThingWala
+PYPI_USER=thingwala
 
 .PHONY: test
 
