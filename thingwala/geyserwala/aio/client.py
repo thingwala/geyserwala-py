@@ -18,6 +18,8 @@ from thingwala.geyserwala.const import (
     GEYSERWALA_MODE_STANDBY,
     GEYSERWALA_SETPOINT_TEMP_MAX,
     GEYSERWALA_SETPOINT_TEMP_MIN,
+    GEYSERWALA_AUTOMATION_TEMP_MAX,
+    GEYSERWALA_AUTOMATION_TEMP_MIN,
 )
 
 
@@ -123,12 +125,15 @@ class GeyserwalaClientAsync:
                     if status == 200:
                         json_blob = await rsp.json()
                         return json_blob
+        except asyncio.TimeoutError as ex:
+            raise RequestError from ex
         except (
             aiohttp.ClientError,
             aiohttp.http_exceptions.HttpProcessingError,
         ) as ex:
-            logger.error(
-                "aiohttp exception on %s %s [%s]: %s",
+            logger.warn(
+                "aiohttp exception %s on %s %s [%s]: %s",
+                ex.__class__.__name__,
                 method,
                 url,
                 getattr(ex, "status", None),
@@ -258,7 +263,7 @@ class GeyserwalaClientAsync:
         return self._status.get("external-setpoint", None)
 
     async def set_external_setpoint(self, external_setpoint: int):
-        if GEYSERWALA_SETPOINT_TEMP_MIN <= external_setpoint <= GEYSERWALA_SETPOINT_TEMP_MAX:
+        if GEYSERWALA_AUTOMATION_TEMP_MIN <= external_setpoint <= GEYSERWALA_AUTOMATION_TEMP_MAX:
             return await self._set_value("external-setpoint", external_setpoint)
         return False
 
