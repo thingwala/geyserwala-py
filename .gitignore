@@ -1,4 +1,5 @@
 **/__pycache__/
+.pytest_cache/
 *.egg-info/
 virtualenv/
 venv/
@@ -6,3 +7,6 @@ venv/
 reports/
 dist/
 *.log
+build/
+.coverage
+.vscode/

@@ -1,9 +1,9 @@
 ####################################################################################
 # Copyright (c) 2023 Thingwala                                                     #
 ####################################################################################
+import asyncio
 import logging
 import sys
-import asyncio
 
 from thingwala.geyserwala.aio.client import GeyserwalaClientAsync
 from thingwala.geyserwala.aio.discovery import GeyserwalaDiscoveryAsync
@@ -29,7 +29,6 @@ async def status(ip, username="admin", password=""):
             print("---")
             print(f"Geyserwala [{ip}]")
             print(f"Name: {gw.name}")
-            print(f"Time: {gw.time}")
             print(f"Status: {gw.status}")
             pump = "RUNNING" if gw.pump_status else "STOPPED"
             print(
@@ -37,7 +36,7 @@ async def status(ip, username="admin", password=""):
             )
             boost = "YES" if gw.boost_demand else "NO "
             element = "ON" if gw.element_demand else "OFF"
-            print(f"Boost: {boost}   Setpoint: {gw.setpoint}  Element: {element}")
+            print(f"Boost: {boost}  Setpoint: {gw.setpoint}  Element: {element}")
             print("Mode:", gw.mode)
 
             await asyncio.sleep(2)

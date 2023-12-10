@@ -11,6 +11,8 @@ from thingwala.geyserwala.aio.client import GeyserwalaClientAsync
 def ip():
     return os.environ['TEST_IP']
 
+
+@pytest.mark.asyncio
 async def test_timers1(ip):
 
     gw = GeyserwalaClientAsync(ip)

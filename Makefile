@@ -17,7 +17,8 @@ to_pypi:
 
 to_pypi_test: test
 	python -m build
-	TWINE_USERNAME=${PYPI_USER} twine upload -r testpypi dist/thingwala_geyserwala-$(shell cat ./version)*
+	# Credentials now come from ~/.pypirc in the form of "API tokens"
+	twine upload -r testpypi dist/thingwala_geyserwala-$(shell cat ./version)*
 
 to_pypi_live: test
 	python -m build

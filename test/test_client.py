@@ -18,12 +18,12 @@ def ip():
     return os.environ['TEST_IP']
 
 
+@pytest.mark.asyncio
 async def test_client(ip):
     gw = GeyserwalaClientAsync(ip)
 
     await gw.update_status()
     assert gw.name == "Geyserwala"
-    assert len(gw.time) == 16
     gw.status
     gw.pump_status
     gw.tank_temp
