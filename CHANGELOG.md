@@ -1,5 +1,19 @@
 # Change Log - Geyserwala Connect - Python Bindings
 
+## [0.0.8] - 2023-12-22
+
+Allow for custom values. Condensed accessors.
+
+### Added
+- `subscribe()`, `unsubscribe()`
+- `get_value()`, `set_value()`
+
+### Changed
+- `update_status()` -> `update()`
+
+### Removed
+- All value key accessors except `id`, `name`, `version`, `status`, `mode`, `tank_temp`, `element_demand`
+
 ## [0.0.7] - 2023-12-09
 
 Migrate to persistent latch signals, with programmable hold time

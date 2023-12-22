@@ -1,5 +1,3 @@
-PYPI_USER=thingwala
-
 .PHONY: test
 
 check:
@@ -22,4 +20,5 @@ to_pypi_test: test
 
 to_pypi_live: test
 	python -m build
-	TWINE_USERNAME=${PYPI_USER} twine upload -r pypi dist/thingwala_geyserwala-$(shell cat ./version)*
+	# Credentials now come from ~/.pypirc in the form of "API tokens"
+	twine upload -r pypi dist/thingwala_geyserwala-$(shell cat ./version)*

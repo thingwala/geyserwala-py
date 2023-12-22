@@ -17,8 +17,6 @@ from thingwala.geyserwala.const import (
     GEYSERWALA_MODE_SOLAR,
     GEYSERWALA_MODE_STANDBY,
     GEYSERWALA_MODE_HOLIDAY,
-    GEYSERWALA_SETPOINT_TEMP_MAX,
-    GEYSERWALA_SETPOINT_TEMP_MIN,
 )
 from thingwala.geyserwala.errors import RequestError, Unauthorized
 
@@ -26,29 +24,15 @@ logger = logging.getLogger(__name__)
 
 
 class GeyserwalaClientAsync:
-    info_keys = [
+    _base_keys = [
         "id",
         "name",
         "version",
         "features",
-    ]
-    status_keys = [
         "status",
+        "mode",
         "tank-temp",
         "element-demand",
-        "collector-temp",
-        "pump-status",
-    ]
-    manual_keys = [
-        "mode",
-        "setpoint",
-        "setpoint-max",
-        "boost-demand",
-    ]
-    integration_keys = [
-        "external-setpoint",
-        "external-demand",
-        "external-disable",
     ]
 
     def __init__(
@@ -65,6 +49,7 @@ class GeyserwalaClientAsync:
         self._values = {}
         self._last_update = 0
         self._cache_time = 0.5
+        self._subscriptions = []
 
     async def close(self):
         await self._session.close()
@@ -165,7 +150,21 @@ class GeyserwalaClientAsync:
             raise Unauthorized()
         raise RequestError(f"Unexpected status: {status}")
 
-    async def update_keys(self, keys):
+    def subscribe(self, key):
+        if key not in self._subscriptions:
+            self._subscriptions.append(key)
+
+    def unsubscribe(self, key):
+        if key in self._base_keys:
+            return
+        self._subscriptions.remove(key)
+
+    async def update(self):
+        keys = list(self._base_keys)
+        keys.extend(self._subscriptions)
+        return await self._update_keys(keys)
+
+    async def _update_keys(self, keys):
         now = self._now()
         if (self._last_update + self._cache_time) > now:
             return True
@@ -178,34 +177,30 @@ class GeyserwalaClientAsync:
                 return True
             return False
 
-    async def update_status(self):
-        keys = list(self.info_keys)
-        keys.extend(self.status_keys)
-        keys.extend(self.manual_keys)
-        keys.extend(self.integration_keys)
-
-        return await self.update_keys(keys)
-
     def _now(self):
         return time.time()
 
     async def _set_value(self, key, value):
         async with self._auth():
             ret = await self._json_req("PATCH", "api/value", json={key: value})
-            if ret:
+            if ret and ret[key] == value:
                 self._values.update(ret)
                 return True
             return False
 
-    def get_key(self, key):
+    def get_value(self, key):
         return self._values.get(key)
 
-    async def set_key(self, key, value):
+    async def set_value(self, key, value):
         return await self._set_value(key, value)
 
     @property
     def id(self):
         return self._values.get("id", "?")
+
+    @property
+    def name(self):
+        return self._values.get("name", "?")
 
     @property
     def version(self):
@@ -218,10 +213,6 @@ class GeyserwalaClientAsync:
             return False
 
     @property
-    def name(self):
-        return self._values.get("name", "?")
-
-    @property
     def status(self):
         return self._values.get("status", "?")
 
@@ -230,42 +221,8 @@ class GeyserwalaClientAsync:
         return self._values.get("tank-temp", -25)
 
     @property
-    def collector_temp(self):
-        return self._values.get("collector-temp", -25)
-
-    @property
-    def pump_status(self):
-        return self._values.get("pump-status", None)
-
-    @property
-    def boost_demand(self):
-        return self._values.get("boost-demand", None)
-
-    async def set_boost_demand(self, on: bool):
-        return await self._set_value("boost-demand", on)
-
-    @property
-    def setpoint(self):
-        return self._values.get("setpoint", None)
-
-    async def set_setpoint(self, setpoint: int):
-        if setpoint < GEYSERWALA_SETPOINT_TEMP_MIN:
-            return False
-        if setpoint > self.setpoint_max:
-            return False
-        return await self._set_value("setpoint", setpoint)
-
-    @property
-    def setpoint_max(self):
-        return self._values.get("setpoint-max", GEYSERWALA_SETPOINT_TEMP_MAX)
-
-    @property
     def element_demand(self):
-        return self._values.get("element-demand", None)
-
-    @property
-    def element_seconds(self):
-        return self._values.get("element-seconds", None)
+        return self._values.get("element-demand", False)
 
     @property
     def modes(self):
@@ -287,31 +244,6 @@ class GeyserwalaClientAsync:
         if mode in GEYSERWALA_MODES:
             return await self._set_value("mode", mode)
         return False
-
-    @property
-    def external_setpoint(self):
-        return self._values.get("external-setpoint", None)
-
-    async def set_external_setpoint(self, external_setpoint: int):
-        if external_setpoint < GEYSERWALA_SETPOINT_TEMP_MIN:
-            return False
-        if external_setpoint > GEYSERWALA_SETPOINT_TEMP_MAX:
-            return False
-        return await self._set_value("external-setpoint", external_setpoint)
-
-    @property
-    def external_demand(self):
-        return self._values.get("external-demand", None)
-
-    async def set_external_demand(self, on: (int, bool)):
-        return await self._set_value("external-demand", on)
-
-    @property
-    def external_disable(self):
-        return self._values.get("external-disable", None)
-
-    async def set_external_disable(self, on: (int, bool)):
-        return await self._set_value("external-disable", on)
 
     async def add_timer(self, timer: dict):
         timer = deepcopy(timer)

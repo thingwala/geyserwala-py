@@ -22,20 +22,20 @@ def ip():
 async def test_client(ip):
     gw = GeyserwalaClientAsync(ip)
 
-    await gw.update_status()
+    await gw.update()
     assert gw.name == "Geyserwala"
     gw.status
-    gw.pump_status
+    gw.get_value('pump-status')
     gw.tank_temp
-    gw.collector_temp
-    gw.boost_demand
+    gw.get_value('collector-temp')
+    gw.get_value('boost-demand')
     gw.element_demand
-    gw.setpoint
+    gw.get_value('setpoint')
     gw.mode
 
     await gw.set_mode(GEYSERWALA_MODE_TIMER)
-    await gw.set_setpoint(65)
-    await gw.set_boost_demand(True)
+    await gw.set_value('setpoint', 65)
+    await gw.set_value('boost-demand', True)
     await asyncio.sleep(2)
-    await gw.set_boost_demand(True)
+    await gw.set_value('boost-demand', True)
     await gw.set_mode(GEYSERWALA_MODE_HOLIDAY)
